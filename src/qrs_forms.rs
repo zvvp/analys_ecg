@@ -15,19 +15,19 @@ impl QrsForm {
             mean_div_intervals: 1.0,
         }
     }
+    pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>) -> Vec<usize> {
 
-    pub fn get_form_indexes(&mut self, fch1: &Vec<f32>, fch2: &Vec<f32>, fch3: &Vec<f32>, refs: &RefQrs, rem_indexes: &Vec<usize>) -> Vec<usize> {
         let mut rem_out = vec![];
         for i in 0..rem_indexes.len() {
             let mut coef_cor1 = vec![0.0; 41];
             let mut coef_cor2 = vec![0.0; 41];
             let mut coef_cor3 = vec![0.0; 41];
             for j in 0..41 {
-                let qrs1 = &fch1[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs1 = &leads.lead1[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
                 coef_cor1[j] = get_coef_cor(&qrs1, &refs.ref_qrs1);
-                let qrs2 = &fch2[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs2 = &leads.lead2[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
                 coef_cor2[j] = get_coef_cor(&qrs2, &refs.ref_qrs2);
-                let qrs3 = &fch3[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs3 = &leads.lead3[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
                 coef_cor3[j] = get_coef_cor(&qrs3, &refs.ref_qrs3);
             }
             let max_cor1 = max_vec(&coef_cor1);
@@ -42,6 +42,23 @@ impl QrsForm {
             }
         }
         rem_out
+    }
+
+    pub fn get_mean_div_intervals(&mut self, div_intervals: &Vec<Option<f32>>) {
+        let slice_div_intervals: Vec<_> = self.form_indexes
+            .iter()
+            .filter_map(|&index| div_intervals.get(index).cloned())
+            .collect();
+        self.mean_div_intervals = &slice_div_intervals.len();
+        // let slice_div_intervals = slice_div_intervals;
+        // let sum_div: Option<&f32> = slice_div_intervals.iter().sum();
+        // self.mean_div_intervals = sum_div / slice_div_intervals.len() as f32;
+        // self.mean_div_intervals = if slice_div_intervals.is_empty() {
+        //     None
+        // } else {
+        //     Some()
+        //
+        // };
     }
 }
 

@@ -2,6 +2,7 @@
 pub struct IntervalsR {
     pub ind_r: Vec<usize>,
     pub intervals_r: Vec<usize>,
+    // pub div_intervals: Vec<Option<f32>>,
     pub div_intervals: Vec<Option<f32>>,
 }
 
