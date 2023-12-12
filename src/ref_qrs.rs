@@ -8,7 +8,7 @@ pub struct RefQrs {
 }
 
 impl RefQrs {
-    pub fn get_ref_forms(&mut self, leads: &Ecg, ind_r: Vec<usize>) {
+    pub fn get_ref_forms(&mut self, leads: &Ecg, ind_r: &Vec<usize>) {
         if ind_r.len() > 1 {
             for i in 0..(ind_r.len() - 1) {
                 let start_index = ind_r[i] - 25;

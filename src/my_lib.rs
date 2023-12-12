@@ -138,7 +138,7 @@ fn get_spec50(ch: &Vec<f32>) -> Vec<f32> {
     spec50
 }
 
-fn clean_ch(ch: &Vec<f32>) -> Vec<f32> {
+pub fn clean_ch(ch: &Vec<f32>) -> Vec<f32> {
     // b, a = butter(2, 20, 'lp', fs=250)
     let b = vec![0.0461318, 0.0922636, 0.0461318];
     let a = vec![1.0, -1.30728503, 0.49181224];
@@ -306,7 +306,7 @@ fn sum_ch(ch1: &Vec<f32>, ch2: &Vec<f32>, ch3: &Vec<f32>) -> Vec<f32> {
     sum_ch
 }
 
-fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
+pub fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
     let len_win = 120;
     let mut out = ch.to_owned();
     let mut buff = vec![0.0; len_win];
