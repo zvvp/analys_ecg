@@ -32,6 +32,7 @@ fn main() {
     let mut qrs1 = QrsForm::new();
     let rem = qrs1.get_form_indexes(&leads, &refqrs, &intervals.ind_r);
     qrs1.get_mean_div_intervals(&intervals.div_intervals);
+    println!("{:?}", &intervals.div_intervals[0..10]);
     println!("{:?}", &qrs1.form_indexes[0..5]);
     println!("{}", qrs1.mean_div_intervals);
 
@@ -39,6 +40,7 @@ fn main() {
     let mut qrs2 = QrsForm::new();
     let rem = qrs2.get_form_indexes(&leads, &refqrs, &rem);
     qrs2.get_mean_div_intervals(&intervals.div_intervals);
+
     println!("{:?}", &qrs2.form_indexes[0..5]);
     println!("{}", qrs2.mean_div_intervals);
 

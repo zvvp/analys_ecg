@@ -2,8 +2,7 @@
 pub struct IntervalsR {
     pub ind_r: Vec<usize>,
     pub intervals_r: Vec<usize>,
-    // pub div_intervals: Vec<Option<f32>>,
-    pub div_intervals: Vec<Option<f32>>,
+    pub div_intervals: Vec<f32>,
 }
 
 impl IntervalsR {
@@ -22,7 +21,7 @@ impl IntervalsR {
             }
             if *val <= 0.0 && max_val > 0.0 {
                 max_val = 0.0;
-                if intervals.intervals_r.len() == 0 {
+                if intervals.intervals_r.is_empty() {
                     intervals.intervals_r.push(ind_max);
                 } else {
                     let interval = ind_max - intervals.ind_r[intervals.ind_r.len() - 1];
@@ -44,21 +43,28 @@ impl IntervalsR {
             intervals.ind_r.remove(intervals.ind_r.len() - 1);
             intervals.intervals_r.remove(intervals.ind_r.len() - 1);
         }
-        if intervals.intervals_r.len() > 0 {
+        if !intervals.intervals_r.is_empty() {
             let mut temp = intervals.intervals_r.to_owned();
             temp.push(temp[temp.len() - 1]);
             temp.remove(0);
-            intervals.div_intervals = intervals.intervals_r
-                .iter()
-                .zip(temp.iter())
-                .map(|(&x, &y)| {
-                    if y > 0 {
-                        Some(x as f32 / y as f32)
-                    } else {
-                        None
-                    }
-                })
-                .collect();
+            for i in 0..temp.len() {
+                let t: f32 = temp[i] as f32;
+                let intr: f32 = intervals.intervals_r[i] as f32;
+                if t > 0.0 {
+                    intervals.div_intervals.push(intr / t);
+                }
+            }
+            // intervals.div_intervals = intervals.intervals_r
+            //     .iter()
+            //     .zip(temp.iter())
+            //     .map(|(&x, &y)| {
+            //         if y > 0 {
+            //             Some(x as f32 / y as f32)
+            //         } else {
+            //             None
+            //         }
+            //     })
+            //     .collect();
         }
         intervals
     }

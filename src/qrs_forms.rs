@@ -16,7 +16,6 @@ impl QrsForm {
         }
     }
     pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>) -> Vec<usize> {
-
         let mut rem_out = vec![];
         for i in 0..rem_indexes.len() {
             let mut coef_cor1 = vec![0.0; 41];
@@ -44,21 +43,12 @@ impl QrsForm {
         rem_out
     }
 
-    pub fn get_mean_div_intervals(&mut self, div_intervals: &Vec<Option<f32>>) {
+    pub fn get_mean_div_intervals(&mut self, div_intervals: &Vec<f32>) {
         let slice_div_intervals: Vec<_> = self.form_indexes
             .iter()
             .filter_map(|&index| div_intervals.get(index).cloned())
             .collect();
-        self.mean_div_intervals = &slice_div_intervals.len();
-        // let slice_div_intervals = slice_div_intervals;
-        // let sum_div: Option<&f32> = slice_div_intervals.iter().sum();
-        // self.mean_div_intervals = sum_div / slice_div_intervals.len() as f32;
-        // self.mean_div_intervals = if slice_div_intervals.is_empty() {
-        //     None
-        // } else {
-        //     Some()
-        //
-        // };
+        println!("{:?}", &slice_div_intervals[..7])
     }
 }
 
