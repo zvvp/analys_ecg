@@ -15,40 +15,43 @@ impl QrsForm {
             mean_div_intervals: 1.0,
         }
     }
-    pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>) -> Vec<usize> {
+    pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
         let mut rem_out = vec![];
         for i in 0..rem_indexes.len() {
             let mut coef_cor1 = vec![0.0; 41];
             let mut coef_cor2 = vec![0.0; 41];
             let mut coef_cor3 = vec![0.0; 41];
+            let mut ind_qrs = ind_r[rem_indexes[i]];
             for j in 0..41 {
-                let qrs1 = &leads.lead1[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs1 = &leads.lead1[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
                 coef_cor1[j] = get_coef_cor(&qrs1, &refs.ref_qrs1);
-                let qrs2 = &leads.lead2[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs2 = &leads.lead2[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
                 coef_cor2[j] = get_coef_cor(&qrs2, &refs.ref_qrs2);
-                let qrs3 = &leads.lead3[rem_indexes[i] - 25 + j - 20..rem_indexes[i] + 46 + j - 20].to_vec();
+                let qrs3 = &leads.lead3[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
                 coef_cor3[j] = get_coef_cor(&qrs3, &refs.ref_qrs3);
             }
             let max_cor1 = max_vec(&coef_cor1);
             let max_cor2 = max_vec(&coef_cor2);
             let max_cor3 = max_vec(&coef_cor3);
             if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
-                &self.form_indexes.push(rem_indexes[i]);
+                &self.form_indexes.push(i);
             } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
-                &self.form_indexes.push(rem_indexes[i]);
+                &self.form_indexes.push(i);
             } else {
-                rem_out.push(rem_indexes[i]);
+                rem_out.push(i);
             }
         }
         rem_out
     }
 
     pub fn get_mean_div_intervals(&mut self, div_intervals: &Vec<f32>) {
-        let slice_div_intervals: Vec<_> = self.form_indexes
-            .iter()
-            .filter_map(|&index| div_intervals.get(index).cloned())
-            .collect();
-        println!("{:?}", &slice_div_intervals[..7])
+        if !self.form_indexes.is_empty() {
+            let mut sum_div: f32 = 0.0;
+            for item in &self.form_indexes {
+                sum_div += &div_intervals[*item];
+            }
+            self.mean_div_intervals = sum_div / self.form_indexes.len() as f32;
+        }
     }
 }
 

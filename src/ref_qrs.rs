@@ -11,10 +11,18 @@ impl RefQrs {
     pub fn get_ref_forms(&mut self, leads: &Ecg, ind_r: &Vec<usize>) {
         if ind_r.len() > 1 {
             for i in 0..(ind_r.len() - 1) {
+                if ind_r[i] < 45 {
+                    continue;
+                }
+                if ind_r[i + 1] + 46 > ind_r.len() - 47 {
+                    continue;
+                }
                 let start_index = ind_r[i] - 25;
                 let end_index = ind_r[i] + 46;
                 let start_index1 = ind_r[i + 1] - 25;
                 let end_index1 = ind_r[i + 1] + 46;
+
+
                 let qrs1 = &leads.lead1[start_index..end_index].to_vec();
                 let qrs2 = &leads.lead2[start_index..end_index].to_vec();
                 let qrs3 = &leads.lead3[start_index..end_index].to_vec();
