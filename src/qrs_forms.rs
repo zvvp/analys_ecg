@@ -21,6 +21,7 @@ impl QrsForm {
             let mut coef_cor1 = vec![0.0; 41];
             let mut coef_cor2 = vec![0.0; 41];
             let mut coef_cor3 = vec![0.0; 41];
+
             let mut ind_qrs = ind_r[rem_indexes[i]];
             for j in 0..41 {
                 let qrs1 = &leads.lead1[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
@@ -34,11 +35,11 @@ impl QrsForm {
             let max_cor2 = max_vec(&coef_cor2);
             let max_cor3 = max_vec(&coef_cor3);
             if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
-                &self.form_indexes.push(i);
+                &self.form_indexes.push(rem_indexes[i]);
             } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
-                &self.form_indexes.push(i);
+                &self.form_indexes.push(rem_indexes[i]);
             } else {
-                rem_out.push(i);
+                rem_out.push(rem_indexes[i]);
             }
         }
         rem_out
