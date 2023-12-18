@@ -86,6 +86,7 @@ impl Forms {
         }
     }
 
+
     pub fn get_types_qrs(&mut self) {
         let mut leads = Ecg::new();
         let sum_leads = pre_proc_r(&leads);
