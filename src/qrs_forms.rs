@@ -1,5 +1,6 @@
 use crate::file_ecg::Ecg;
 use crate::intervals::IntervalsR;
+use crate::my_lib::{clean_ch, del_isoline, pre_proc_r};
 use crate::qrs_lib::{get_coef_cor, max_vec};
 use crate::ref_qrs::RefQrs;
 
@@ -85,5 +86,66 @@ impl Forms {
         }
     }
 
-    pub fn get_types_qrs() {}
+    pub fn get_types_qrs(&mut self) {
+        let mut leads = Ecg::new();
+        let sum_leads = pre_proc_r(&leads);
+        let mut intervals = IntervalsR::new(&sum_leads);
+
+        leads.lead1 = clean_ch(&leads.lead1);
+        leads.lead2 = clean_ch(&leads.lead2);
+        leads.lead3 = clean_ch(&leads.lead3);
+        leads.lead1 = del_isoline(&leads.lead1);
+        leads.lead2 = del_isoline(&leads.lead2);
+        leads.lead3 = del_isoline(&leads.lead3);
+
+        let mut refqrs = RefQrs {
+            ref_qrs1: vec![],
+            ref_qrs2: vec![],
+            ref_qrs3: vec![],
+        };
+
+        // let mut forms = Forms::new();
+
+        let rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form0.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form0.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form1.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form2.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form3.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form4.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form5.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form6.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form7.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form8.get_mean_div_intervals(&intervals.div_intervals);
+
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        let rem = self.Form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.Form9.get_mean_div_intervals(&intervals.div_intervals);
+    }
 }

@@ -54,17 +54,6 @@ impl IntervalsR {
                     intervals.div_intervals.push(intr / t);
                 }
             }
-            // intervals.div_intervals = intervals.intervals_r
-            //     .iter()
-            //     .zip(temp.iter())
-            //     .map(|(&x, &y)| {
-            //         if y > 0 {
-            //             Some(x as f32 / y as f32)
-            //         } else {
-            //             None
-            //         }
-            //     })
-            //     .collect();
         }
         intervals
     }
