@@ -44,11 +44,11 @@ pub fn get_coef_cor(x: &Vec<f32>, y: &Vec<f32>) -> f32 {
     // out
 }
 
-pub fn max_cor(cor1: f32, cor2: f32, cor3: f32) -> f32 {
-    let mut vec_cor = vec![cor1, cor2, cor3];
-    vec_cor.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    vec_cor[2]
-}
+// pub fn max_cor(cor1: f32, cor2: f32, cor3: f32) -> f32 {
+//     let mut vec_cor = vec![cor1, cor2, cor3];
+//     vec_cor.sort_by(|a, b| a.partial_cmp(b).unwrap());
+//     vec_cor[2]
+// }
 
 pub fn max_vec(vec: &Vec<f32>) -> f32 {
     let mut max_v = 0.0;

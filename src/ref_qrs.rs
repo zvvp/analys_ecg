@@ -11,8 +11,8 @@ impl RefQrs {
     pub fn get_ref_forms(&mut self, leads: &Ecg, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) {
         if rem_indexes.len() > 1 {
             for i in 0..rem_indexes.len() - 1 {
-                let mut ind_qrs = ind_r[rem_indexes[i]];
-                let mut ind_qrs1 = ind_r[rem_indexes[i + 1]];
+                let ind_qrs = ind_r[rem_indexes[i]];
+                let ind_qrs1 = ind_r[rem_indexes[i + 1]];
 
                 if ind_qrs < 45 {
                     continue;

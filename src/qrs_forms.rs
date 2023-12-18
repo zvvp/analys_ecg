@@ -23,7 +23,7 @@ impl QrsForm {
             let mut coef_cor2 = vec![0.0; 41];
             let mut coef_cor3 = vec![0.0; 41];
 
-            let mut ind_qrs = ind_r[rem_indexes[i]];
+            let ind_qrs = ind_r[rem_indexes[i]];
             for j in 0..41 {
                 let qrs1 = &leads.lead1[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
                 coef_cor1[j] = get_coef_cor(&qrs1, &refs.ref_qrs1);
@@ -36,9 +36,9 @@ impl QrsForm {
             let max_cor2 = max_vec(&coef_cor2);
             let max_cor3 = max_vec(&coef_cor3);
             if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
-                &self.form_indexes.push(rem_indexes[i]);
+                let _ = &self.form_indexes.push(rem_indexes[i]);
             } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
-                &self.form_indexes.push(rem_indexes[i]);
+                let _ = &self.form_indexes.push(rem_indexes[i]);
             } else {
                 rem_out.push(rem_indexes[i]);
             }
@@ -58,31 +58,31 @@ impl QrsForm {
 }
 
 pub struct Forms {
-    pub Form0: QrsForm,
-    pub Form1: QrsForm,
-    pub Form2: QrsForm,
-    pub Form3: QrsForm,
-    pub Form4: QrsForm,
-    pub Form5: QrsForm,
-    pub Form6: QrsForm,
-    pub Form7: QrsForm,
-    pub Form8: QrsForm,
-    pub Form9: QrsForm,
+    pub form0: QrsForm,
+    pub form1: QrsForm,
+    pub form2: QrsForm,
+    pub form3: QrsForm,
+    pub form4: QrsForm,
+    pub form5: QrsForm,
+    pub form6: QrsForm,
+    pub form7: QrsForm,
+    pub form8: QrsForm,
+    pub form9: QrsForm,
 }
 
 impl Forms {
     pub fn new() -> Forms {
         Forms {
-            Form0: QrsForm::new(),
-            Form1: QrsForm::new(),
-            Form2: QrsForm::new(),
-            Form3: QrsForm::new(),
-            Form4: QrsForm::new(),
-            Form5: QrsForm::new(),
-            Form6: QrsForm::new(),
-            Form7: QrsForm::new(),
-            Form8: QrsForm::new(),
-            Form9: QrsForm::new(),
+            form0: QrsForm::new(),
+            form1: QrsForm::new(),
+            form2: QrsForm::new(),
+            form3: QrsForm::new(),
+            form4: QrsForm::new(),
+            form5: QrsForm::new(),
+            form6: QrsForm::new(),
+            form7: QrsForm::new(),
+            form8: QrsForm::new(),
+            form9: QrsForm::new(),
         }
     }
 
@@ -90,7 +90,7 @@ impl Forms {
     pub fn get_types_qrs(&mut self) {
         let mut leads = Ecg::new();
         let sum_leads = pre_proc_r(&leads);
-        let mut intervals = IntervalsR::new(&sum_leads);
+        let intervals = IntervalsR::new(&sum_leads);
 
         leads.lead1 = clean_ch(&leads.lead1);
         leads.lead2 = clean_ch(&leads.lead2);
@@ -110,43 +110,43 @@ impl Forms {
         let rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form0.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form0.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form0.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form0.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form1.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form1.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form2.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form2.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form3.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form3.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form4.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form4.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form5.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form5.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form6.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form6.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form7.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form7.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form8.get_mean_div_intervals(&intervals.div_intervals);
+        let rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form8.get_mean_div_intervals(&intervals.div_intervals);
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.Form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.Form9.get_mean_div_intervals(&intervals.div_intervals);
+        let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        self.form9.get_mean_div_intervals(&intervals.div_intervals);
     }
 }
