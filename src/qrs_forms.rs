@@ -57,6 +57,7 @@ impl QrsForm {
 }
 
 pub struct Forms {
+    pub Form0: QrsForm,
     pub Form1: QrsForm,
     pub Form2: QrsForm,
     pub Form3: QrsForm,
@@ -66,5 +67,23 @@ pub struct Forms {
     pub Form7: QrsForm,
     pub Form8: QrsForm,
     pub Form9: QrsForm,
-    pub Form10: QrsForm,
+}
+
+impl Forms {
+    pub fn new() -> Forms {
+        Forms {
+            Form0: QrsForm::new(),
+            Form1: QrsForm::new(),
+            Form2: QrsForm::new(),
+            Form3: QrsForm::new(),
+            Form4: QrsForm::new(),
+            Form5: QrsForm::new(),
+            Form6: QrsForm::new(),
+            Form7: QrsForm::new(),
+            Form8: QrsForm::new(),
+            Form9: QrsForm::new(),
+        }
+    }
+
+    pub fn get_types_qrs() {}
 }

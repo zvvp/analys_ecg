@@ -13,17 +13,18 @@ impl RefQrs {
             for i in 0..rem_indexes.len() - 1 {
                 let mut ind_qrs = ind_r[rem_indexes[i]];
                 let mut ind_qrs1 = ind_r[rem_indexes[i + 1]];
+
                 if ind_qrs < 45 {
                     continue;
                 }
                 if ind_qrs > ind_r.len() - 47 {
                     continue;
                 }
+
                 let start_index = ind_qrs - 25;
                 let end_index = ind_qrs + 46;
                 let start_index1 = ind_qrs1 - 25;
                 let end_index1 = ind_qrs1 + 46;
-
 
                 let qrs1 = &leads.lead1[start_index..end_index].to_vec();
                 let qrs2 = &leads.lead2[start_index..end_index].to_vec();
@@ -44,6 +45,7 @@ impl RefQrs {
                 let max_cor1 = max_vec(&coef_cor1);
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
+
                 if max_cor1 > 0.93 && max_cor2 > 0.93 && max_cor3 > 0.93 {
                     self.ref_qrs1 = qrs1.to_owned();
                     self.ref_qrs2 = qrs2.to_owned();
