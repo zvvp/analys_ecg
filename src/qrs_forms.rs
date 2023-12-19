@@ -18,29 +18,31 @@ impl QrsForm {
     }
     pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
         let mut rem_out = vec![];
-        for i in 0..rem_indexes.len() {
-            let mut coef_cor1 = vec![0.0; 41];
-            let mut coef_cor2 = vec![0.0; 41];
-            let mut coef_cor3 = vec![0.0; 41];
+        if rem_indexes.len() > 100 {
+            for i in 0..rem_indexes.len() {
+                let mut coef_cor1 = vec![0.0; 41];
+                let mut coef_cor2 = vec![0.0; 41];
+                let mut coef_cor3 = vec![0.0; 41];
 
-            let ind_qrs = ind_r[rem_indexes[i]];
-            for j in 0..41 {
-                let qrs1 = &leads.lead1[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
-                coef_cor1[j] = get_coef_cor(&qrs1, &refs.ref_qrs1);
-                let qrs2 = &leads.lead2[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
-                coef_cor2[j] = get_coef_cor(&qrs2, &refs.ref_qrs2);
-                let qrs3 = &leads.lead3[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
-                coef_cor3[j] = get_coef_cor(&qrs3, &refs.ref_qrs3);
-            }
-            let max_cor1 = max_vec(&coef_cor1);
-            let max_cor2 = max_vec(&coef_cor2);
-            let max_cor3 = max_vec(&coef_cor3);
-            if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
-                let _ = &self.form_indexes.push(rem_indexes[i]);
-            } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
-                let _ = &self.form_indexes.push(rem_indexes[i]);
-            } else {
-                rem_out.push(rem_indexes[i]);
+                let ind_qrs = ind_r[rem_indexes[i]];
+                for j in 0..41 {
+                    let qrs1 = &leads.lead1[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
+                    coef_cor1[j] = get_coef_cor(&qrs1, &refs.ref_qrs1);
+                    let qrs2 = &leads.lead2[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
+                    coef_cor2[j] = get_coef_cor(&qrs2, &refs.ref_qrs2);
+                    let qrs3 = &leads.lead3[ind_qrs - 25 + j - 20..ind_qrs + 46 + j - 20].to_vec();
+                    coef_cor3[j] = get_coef_cor(&qrs3, &refs.ref_qrs3);
+                }
+                let max_cor1 = max_vec(&coef_cor1);
+                let max_cor2 = max_vec(&coef_cor2);
+                let max_cor3 = max_vec(&coef_cor3);
+                if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+                } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+                } else {
+                    rem_out.push(rem_indexes[i]);
+                }
             }
         }
         rem_out
@@ -105,7 +107,7 @@ impl Forms {
             ref_qrs3: vec![],
         };
 
-        // let mut forms = Forms::new();
+        println!("Всего R: {}",intervals.ind_r.len());
 
         let rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
 

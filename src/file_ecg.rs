@@ -27,7 +27,7 @@ impl Ecg {
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer).expect("Failed to read file");
 
-        let ecg_data: Vec<i16> = buffer[1024..1_000_000]
+        let ecg_data: Vec<i16> = buffer[1024..9_000_000]
         // let ecg_data: Vec<i16> = buffer[1024..]
             .chunks(2)
             .map(|chunk| ((chunk[1] as i32) << 8 | (chunk[0] as i32)) as i16)
