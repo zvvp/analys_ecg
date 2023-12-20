@@ -326,31 +326,26 @@ pub fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
     out
 }
 
-pub fn pre_proc_r(leads: &Ecg) -> Vec<f32> {
-// pub fn pre_proc_r(ch1: &Vec<f32>, ch2: &Vec<f32>, ch3: &Vec<f32>) -> (Vec<f32>, Vec<f32>, Vec<f32>, Vec<f32>) {
-    let cln_ch1 = clean_ch(&leads.lead1);
-    let cln_ch2 = clean_ch(&leads.lead2);
-    let cln_ch3 = clean_ch(&leads.lead3);
+pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
+    leads.lead1 = clean_ch(&leads.lead1);
+    leads.lead2 = clean_ch(&leads.lead2);
+    leads.lead3 = clean_ch(&leads.lead3);
 
-    let p2p_ch1 = get_p2p(&cln_ch1, 40, false);
-    let p2p_ch2 = get_p2p(&cln_ch2, 40, false);
-    let p2p_ch3 = get_p2p(&cln_ch3, 40, false);
+    let p2p_ch1 = get_p2p(&leads.lead1, 40, false);
+    let p2p_ch2 = get_p2p(&leads.lead2, 40, false);
+    let p2p_ch3 = get_p2p(&leads.lead3, 40, false);
 
-    // let p2p_ch1 = del_isoline(&p2p_ch1);
-    // let p2p_ch2 = del_isoline(&p2p_ch2);
-    // let p2p_ch3 = del_isoline(&p2p_ch3);
+    let art1 = del_artifacts(&leads.lead1, &p2p_ch1);
+    let art2 = del_artifacts(&leads.lead2, &p2p_ch2);
+    let art3 = del_artifacts(&leads.lead3, &p2p_ch3);
 
-    let art1 = del_artifacts(&cln_ch1, &p2p_ch1);
-    let art2 = del_artifacts(&cln_ch2, &p2p_ch2);
-    let art3 = del_artifacts(&cln_ch3, &p2p_ch3);
+    leads.lead1 = del_isoline(&art1.0);
+    leads.lead2 = del_isoline(&art2.0);
+    leads.lead3 = del_isoline(&art3.0);
 
-    let cln_ch1 = del_isoline(&art1.0);
-    let cln_ch2 = del_isoline(&art2.0);
-    let cln_ch3 = del_isoline(&art3.0);
-
-    let fch1 = del_nouse(&cln_ch1, &art1.1);
-    let fch2 = del_nouse(&cln_ch2, &art2.1);
-    let fch3 = del_nouse(&cln_ch3, &art3.1);
+    let fch1 = del_nouse(&leads.lead1, &art1.1);
+    let fch2 = del_nouse(&leads.lead2, &art2.1);
+    let fch3 = del_nouse(&leads.lead3, &art3.1);
 
     let fch1 = get_p2p(&fch1, 30, true);
     let fch2 = get_p2p(&fch2, 30, true);
@@ -359,8 +354,7 @@ pub fn pre_proc_r(leads: &Ecg) -> Vec<f32> {
     let fch1 = filt_r(&fch1);
     let fch2 = filt_r(&fch2);
     let fch3 = filt_r(&fch3);
-    // let sum_leads = sum_ch(&fch1, &fch2, &fch3);
-    // (sum_leads, fch1, fch2, fch3)
+
     sum_ch(&fch1, &fch2, &fch3)
 }
 

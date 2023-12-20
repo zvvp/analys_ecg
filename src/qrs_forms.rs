@@ -1,6 +1,6 @@
 use crate::file_ecg::Ecg;
 use crate::intervals::IntervalsR;
-use crate::my_lib::{clean_ch, del_isoline, pre_proc_r};
+use crate::my_lib::pre_proc_r;
 use crate::qrs_lib::{get_coef_cor, max_vec};
 use crate::ref_qrs::RefQrs;
 
@@ -60,7 +60,6 @@ impl QrsForm {
 }
 
 pub struct Forms {
-    pub form0: QrsForm,
     pub form1: QrsForm,
     pub form2: QrsForm,
     pub form3: QrsForm,
@@ -75,7 +74,6 @@ pub struct Forms {
 impl Forms {
     pub fn new() -> Forms {
         Forms {
-            form0: QrsForm::new(),
             form1: QrsForm::new(),
             form2: QrsForm::new(),
             form3: QrsForm::new(),
@@ -89,17 +87,10 @@ impl Forms {
     }
 
 
-    pub fn get_types_qrs(&mut self) {
+    pub fn get_types_qrs(&mut self) -> Vec<i32> {
         let mut leads = Ecg::new();
-        let sum_leads = pre_proc_r(&leads);
+        let sum_leads = pre_proc_r(&mut leads);
         let intervals = IntervalsR::new(&sum_leads);
-
-        leads.lead1 = clean_ch(&leads.lead1);
-        leads.lead2 = clean_ch(&leads.lead2);
-        leads.lead3 = clean_ch(&leads.lead3);
-        leads.lead1 = del_isoline(&leads.lead1);
-        leads.lead2 = del_isoline(&leads.lead2);
-        leads.lead3 = del_isoline(&leads.lead3);
 
         let mut refqrs = RefQrs {
             ref_qrs1: vec![],
@@ -107,48 +98,82 @@ impl Forms {
             ref_qrs3: vec![],
         };
 
-        println!("Всего R: {}",intervals.ind_r.len());
+        println!("Всего R: {}", intervals.ind_r.len());
 
-        let rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form0.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form0.get_mean_div_intervals(&intervals.div_intervals);
+        let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
+        let mut ind_num_types = vec![0; intervals.ind_r.len()];
 
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
+        for i in 0..self.form1.form_indexes.len() {
+            ind_num_types[self.form1.form_indexes[i]] = 1;
+        }
 
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form2.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form3.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form4.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form5.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form6.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form7.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form8.get_mean_div_intervals(&intervals.div_intervals);
-
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
-        let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
-        self.form9.get_mean_div_intervals(&intervals.div_intervals);
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form2.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form2.form_indexes.len() {
+                ind_num_types[self.form2.form_indexes[i]] = 2;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form3.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form3.form_indexes.len() {
+                ind_num_types[self.form3.form_indexes[i]] = 3;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form4.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form4.form_indexes.len() {
+                ind_num_types[self.form4.form_indexes[i]] = 4;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form5.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form5.form_indexes.len() {
+                ind_num_types[self.form5.form_indexes[i]] = 5;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form6.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form6.form_indexes.len() {
+                ind_num_types[self.form6.form_indexes[i]] = 6;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form7.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form7.form_indexes.len() {
+                ind_num_types[self.form7.form_indexes[i]] = 7;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form8.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form8.form_indexes.len() {
+                ind_num_types[self.form8.form_indexes[i]] = 8;
+            }
+        }
+        if !rem.is_empty() {
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+            self.form9.get_mean_div_intervals(&intervals.div_intervals);
+            for i in 0..self.form9.form_indexes.len() {
+                ind_num_types[self.form9.form_indexes[i]] = 9;
+            }
+        }
+        ind_num_types
     }
 }

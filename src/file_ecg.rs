@@ -73,5 +73,5 @@ impl Ecg {
 #[test]
 fn it_works() {
     let leads = Ecg::new();
-    assert!(leads.lead1.len() != 0);
+    assert_ne!(leads.lead1.len(), 0);
 }
