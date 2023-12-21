@@ -1,8 +1,12 @@
+use std::fs::File;
 use crate::file_ecg::Ecg;
 use crate::intervals::IntervalsR;
 use crate::my_lib::pre_proc_r;
 use crate::qrs_lib::{get_coef_cor, max_vec};
 use crate::ref_qrs::RefQrs;
+use std::io::prelude::*;
+use std::io::BufWriter;
+use encoding_rs::WINDOWS_1251;
 
 pub struct QrsForm {
     pub form_indexes: Vec<usize>,
@@ -85,7 +89,6 @@ impl Forms {
             form9: QrsForm::new(),
         }
     }
-
 
     pub fn get_types_qrs(&mut self) -> Vec<i32> {
         let mut leads = Ecg::new();
@@ -173,6 +176,28 @@ impl Forms {
             for i in 0..self.form9.form_indexes.len() {
                 ind_num_types[self.form9.form_indexes[i]] = 9;
             }
+        }
+
+        let file = File::create("B.txt").expect("Не удалось создать файл");
+        let mut writer = BufWriter::new(file);
+
+        let text = "\nДата:\nПациент:\nВозраст:\nПол:\n№ палаты:\n№ истории болезни:\n\n\n\n\n\n";
+        let (encoded_text, _encoding_used, _errors) = WINDOWS_1251.encode(&text);
+        writer
+            .write(&encoded_text)
+            .expect("Не удалось записать в файл");
+
+        for i in 0..intervals.ind_r.len() {
+            let arg3 = match &ind_num_types[i] {
+                1 => "N",
+                2 => "V",
+                _ => "A",
+            };
+            let text1 = format!("{};{};{}\n", &intervals.ind_r[i], &intervals.intervals_r[i], arg3);
+            let (encoded_text, _encoding_used, _errors) = WINDOWS_1251.encode(&text1);
+            writer
+                .write(&encoded_text)
+                .expect("Не удалось записать в файл");
         }
         ind_num_types
     }
