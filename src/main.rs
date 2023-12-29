@@ -11,16 +11,15 @@ use std::time::Instant;
 
 fn main() {
     let start = Instant::now();
-
     let mut forms = Forms::new();
-    let ind_num_qrs = forms.get_types_qrs();
+    let _ind_num_qrs = forms.get_types_qrs();
 
     let duration = start.elapsed().as_millis();
     println!("Время выполнения: {} ms", duration);
 
     println!("Type1: {:?}", &forms.form1.form_indexes.len());
     // println!("Type1: {:?}", &forms.form1.form_indexes[..10]);
-    println!("Type1: {:?}", &ind_num_qrs[..60]);
+    // println!("Type1: {:?}", &ind_num_qrs[..60]);
     println!("  {}", &forms.form1.mean_div_intervals);
 
     println!("Type2: {:?}", &forms.form2.form_indexes.len());

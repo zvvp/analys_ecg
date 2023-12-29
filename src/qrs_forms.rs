@@ -8,21 +8,23 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use encoding_rs::WINDOWS_1251;
 
-pub struct QrsForm {
+pub struct QrsForm<'a> {
     pub form_indexes: Vec<usize>,
     pub mean_div_intervals: f32,
+    pub form_char: &'a str,
 }
 
-impl QrsForm {
-    pub fn new() -> QrsForm {
+impl QrsForm<'_> {
+    pub fn new() -> QrsForm<'static> {
         QrsForm {
             form_indexes: vec![],
-            mean_div_intervals: 1.0,
+            mean_div_intervals: 0.0,
+            form_char: "",
         }
     }
     pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
         let mut rem_out = vec![];
-        if rem_indexes.len() > 100 {
+        if rem_indexes.len() > 10 {
             for i in 0..rem_indexes.len() {
                 let mut coef_cor1 = vec![0.0; 41];
                 let mut coef_cor2 = vec![0.0; 41];
@@ -54,29 +56,34 @@ impl QrsForm {
 
     pub fn get_mean_div_intervals(&mut self, div_intervals: &Vec<f32>) {
         if !self.form_indexes.is_empty() {
+            let mut count_div: i32 = 0;
             let mut sum_div: f32 = 0.0;
             for item in &self.form_indexes {
-                sum_div += &div_intervals[*item];
+                if (div_intervals[*item] < 3.0) && (div_intervals[*item] > 0.4) {
+                    sum_div += &div_intervals[*item];
+                    count_div += 1;
+                }
             }
-            self.mean_div_intervals = sum_div / self.form_indexes.len() as f32;
+            self.mean_div_intervals = sum_div / count_div as f32;
+            println!("{}", count_div);
         }
     }
 }
 
-pub struct Forms {
-    pub form1: QrsForm,
-    pub form2: QrsForm,
-    pub form3: QrsForm,
-    pub form4: QrsForm,
-    pub form5: QrsForm,
-    pub form6: QrsForm,
-    pub form7: QrsForm,
-    pub form8: QrsForm,
-    pub form9: QrsForm,
+pub struct Forms<'a> {
+    pub form1: QrsForm<'a>,
+    pub form2: QrsForm<'a>,
+    pub form3: QrsForm<'a>,
+    pub form4: QrsForm<'a>,
+    pub form5: QrsForm<'a>,
+    pub form6: QrsForm<'a>,
+    pub form7: QrsForm<'a>,
+    pub form8: QrsForm<'a>,
+    pub form9: QrsForm<'a>,
 }
 
-impl Forms {
-    pub fn new() -> Forms {
+impl Forms<'_> {
+    pub fn new() -> Forms<'static> {
         Forms {
             form1: QrsForm::new(),
             form2: QrsForm::new(),
@@ -101,7 +108,7 @@ impl Forms {
             ref_qrs3: vec![],
         };
 
-        println!("Всего R: {}", intervals.ind_r.len());
+        // println!("Всего R: {}", intervals.ind_r.len());
 
         let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
         let mut ind_num_types = vec![0; intervals.ind_r.len()];
@@ -109,6 +116,12 @@ impl Forms {
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
         rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
+        if self.form1.mean_div_intervals >= 0.85 {
+            self.form1.form_char = "N";
+        }
+        if (self.form1.mean_div_intervals < 0.85) && (self.form1.mean_div_intervals > 0.1) {
+            self.form1.form_char = "V";
+        }
         for i in 0..self.form1.form_indexes.len() {
             ind_num_types[self.form1.form_indexes[i]] = 1;
         }
@@ -117,6 +130,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form2.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form2.mean_div_intervals >= 0.85 {
+                self.form2.form_char = "N";
+            }
+            if (self.form2.mean_div_intervals < 0.85) && (self.form2.mean_div_intervals > 0.1) {
+                self.form2.form_char = "V";
+            }
             for i in 0..self.form2.form_indexes.len() {
                 ind_num_types[self.form2.form_indexes[i]] = 2;
             }
@@ -125,6 +144,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form3.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form3.mean_div_intervals >= 0.85 {
+                self.form3.form_char = "N";
+            }
+            if (self.form3.mean_div_intervals < 0.85) && (self.form3.mean_div_intervals > 0.1) {
+                self.form3.form_char = "V";
+            }
             for i in 0..self.form3.form_indexes.len() {
                 ind_num_types[self.form3.form_indexes[i]] = 3;
             }
@@ -133,6 +158,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form4.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form4.mean_div_intervals >= 0.85 {
+                self.form4.form_char = "N";
+            }
+            if (self.form4.mean_div_intervals < 0.85) && (self.form4.mean_div_intervals > 0.1) {
+                self.form4.form_char = "V";
+            }
             for i in 0..self.form4.form_indexes.len() {
                 ind_num_types[self.form4.form_indexes[i]] = 4;
             }
@@ -141,6 +172,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form5.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form5.mean_div_intervals >= 0.85 {
+                self.form5.form_char = "N";
+            }
+            if (self.form5.mean_div_intervals < 0.85) && (self.form5.mean_div_intervals > 0.1) {
+                self.form5.form_char = "V";
+            }
             for i in 0..self.form5.form_indexes.len() {
                 ind_num_types[self.form5.form_indexes[i]] = 5;
             }
@@ -149,6 +186,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form6.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form6.mean_div_intervals >= 0.85 {
+                self.form6.form_char = "N";
+            }
+            if (self.form6.mean_div_intervals < 0.85) && (self.form6.mean_div_intervals > 0.1) {
+                self.form6.form_char = "V";
+            }
             for i in 0..self.form6.form_indexes.len() {
                 ind_num_types[self.form6.form_indexes[i]] = 6;
             }
@@ -157,6 +200,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form7.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form7.mean_div_intervals >= 0.85 {
+                self.form7.form_char = "N";
+            }
+            if (self.form7.mean_div_intervals < 0.85) && (self.form7.mean_div_intervals > 0.1) {
+                self.form7.form_char = "V";
+            }
             for i in 0..self.form7.form_indexes.len() {
                 ind_num_types[self.form7.form_indexes[i]] = 7;
             }
@@ -165,6 +214,12 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form8.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form8.mean_div_intervals >= 0.85 {
+                self.form8.form_char = "N";
+            }
+            if (self.form8.mean_div_intervals < 0.85) && (self.form8.mean_div_intervals > 0.1) {
+                self.form8.form_char = "V";
+            }
             for i in 0..self.form8.form_indexes.len() {
                 ind_num_types[self.form8.form_indexes[i]] = 8;
             }
@@ -173,12 +228,18 @@ impl Forms {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form9.get_mean_div_intervals(&intervals.div_intervals);
+            if self.form9.mean_div_intervals >= 0.85 {
+                self.form9.form_char = "N";
+            }
+            if (self.form9.mean_div_intervals < 0.85) && (self.form9.mean_div_intervals > 0.1) {
+                self.form9.form_char = "V";
+            }
             for i in 0..self.form9.form_indexes.len() {
                 ind_num_types[self.form9.form_indexes[i]] = 9;
             }
         }
 
-        let file = File::create("B.txt").expect("Не удалось создать файл");
+        let file = File::create("C:\\EcgVar\\B.txt").expect("Не удалось создать файл");
         let mut writer = BufWriter::new(file);
 
         let text = "\nДата:\nПациент:\nВозраст:\nПол:\n№ палаты:\n№ истории болезни:\n\n\n\n\n\n";
@@ -188,10 +249,18 @@ impl Forms {
             .expect("Не удалось записать в файл");
 
         for i in 0..intervals.ind_r.len() {
+
             let arg3 = match &ind_num_types[i] {
-                1 => "N",
-                2 => "V",
-                _ => "A",
+                1 => self.form1.form_char,
+                2 => self.form2.form_char,
+                3 => self.form3.form_char,
+                4 => self.form4.form_char,
+                5 => self.form5.form_char,
+                6 => self.form6.form_char,
+                7 => self.form7.form_char,
+                8 => self.form8.form_char,
+                9 => self.form9.form_char,
+                _ => "U",
             };
             let text1 = format!("{};{};{}\n", &intervals.ind_r[i], &intervals.intervals_r[i], arg3);
             let (encoded_text, _encoding_used, _errors) = WINDOWS_1251.encode(&text1);

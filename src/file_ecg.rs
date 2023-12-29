@@ -22,13 +22,13 @@ impl Ecg {
     pub fn new() -> Ecg {
         let files = glob::glob("*.ecg").expect("Failed to read files");
         let fname = files.filter_map(Result::ok).next().unwrap();
-
+        println!("{:?}", fname);
         let mut file = File::open(&fname).expect("Failed to open file");
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer).expect("Failed to read file");
 
-        let ecg_data: Vec<i16> = buffer[1024..9_000_000]
-        // let ecg_data: Vec<i16> = buffer[1024..]
+        // let ecg_data: Vec<i16> = buffer[1024..9_000_000]
+        let ecg_data: Vec<i16> = buffer[1024..]
             .chunks(2)
             .map(|chunk| ((chunk[1] as i32) << 8 | (chunk[0] as i32)) as i16)
             .collect();
