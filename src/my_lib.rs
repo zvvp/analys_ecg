@@ -1,4 +1,7 @@
+use std::path::PathBuf;
 use crate::file_ecg::Ecg;
+use std::sync::{Arc, mpsc, Mutex};
+use std::thread;
 
 fn my_diff(ch: &Vec<f32>) -> Vec<f32> {
     let ch_copy = ch.to_owned();
@@ -327,33 +330,57 @@ pub fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
 }
 
 pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
-    leads.lead1 = clean_ch(&leads.lead1);
-    leads.lead2 = clean_ch(&leads.lead2);
-    leads.lead3 = clean_ch(&leads.lead3);
+    let ch1 = leads.lead1.to_owned();
+    let ch2 = leads.lead2.to_owned();
+    let ch3 = leads.lead3.to_owned();
 
-    let p2p_ch1 = get_p2p(&leads.lead1, 40, false);
-    let p2p_ch2 = get_p2p(&leads.lead2, 40, false);
-    let p2p_ch3 = get_p2p(&leads.lead3, 40, false);
+    let (tx1, rx1) = mpsc::channel::<Vec<f32>>();
+    let (tx11, rx11) = mpsc::channel::<Vec<f32>>();
+    let (tx2, rx2) = mpsc::channel::<Vec<f32>>();
+    let (tx22, rx22) = mpsc::channel::<Vec<f32>>();
+    let (tx3, rx3) = mpsc::channel::<Vec<f32>>();
+    let (tx33, rx33) = mpsc::channel::<Vec<f32>>();
 
-    let art1 = del_artifacts(&leads.lead1, &p2p_ch1);
-    let art2 = del_artifacts(&leads.lead2, &p2p_ch2);
-    let art3 = del_artifacts(&leads.lead3, &p2p_ch3);
+    tx1.send(ch1).unwrap();
+    thread::spawn(move || {
+        let mut received = rx1.recv().unwrap();
+        let ch1 = clean_ch(&received);
+        let p2p_ch1 = get_p2p(&ch1, 40, false);
+        let art1 = del_artifacts(&received, &p2p_ch1);
+        received = del_isoline(&art1.0);
+        let fch1 = del_nouse(&received, &art1.1);
+        let fch1 = get_p2p(&fch1, 30, true);
+        let fch1 = filt_r(&fch1);
+        tx11.send(fch1).unwrap();
+    });
+    tx2.send(ch2).unwrap();
+    thread::spawn(move || {
+        let mut received = rx2.recv().unwrap();
+        let ch2 = clean_ch(&received);
+        let p2p_ch2 = get_p2p(&ch2, 40, false);
+        let art2 = del_artifacts(&received, &p2p_ch2);
+        received = del_isoline(&art2.0);
+        let fch2 = del_nouse(&received, &art2.1);
+        let fch2 = get_p2p(&fch2, 30, true);
+        let fch2 = filt_r(&fch2);
+        tx22.send(fch2).unwrap();
+    });
+    tx3.send(ch3).unwrap();
+    thread::spawn(move || {
+        let mut received = rx3.recv().unwrap();
+        let ch3 = clean_ch(&received);
+        let p2p_ch3 = get_p2p(&ch3, 40, false);
+        let art3 = del_artifacts(&received, &p2p_ch3);
+        received = del_isoline(&art3.0);
+        let fch3 = del_nouse(&received, &art3.1);
+        let fch3 = get_p2p(&fch3, 30, true);
+        let fch3 = filt_r(&fch3);
+        tx33.send(fch3).unwrap();
+    });
 
-    leads.lead1 = del_isoline(&art1.0);
-    leads.lead2 = del_isoline(&art2.0);
-    leads.lead3 = del_isoline(&art3.0);
-
-    let fch1 = del_nouse(&leads.lead1, &art1.1);
-    let fch2 = del_nouse(&leads.lead2, &art2.1);
-    let fch3 = del_nouse(&leads.lead3, &art3.1);
-
-    let fch1 = get_p2p(&fch1, 30, true);
-    let fch2 = get_p2p(&fch2, 30, true);
-    let fch3 = get_p2p(&fch3, 30, true);
-
-    let fch1 = filt_r(&fch1);
-    let fch2 = filt_r(&fch2);
-    let fch3 = filt_r(&fch3);
+    let fch1 = rx11.recv().unwrap();
+    let fch2 = rx22.recv().unwrap();
+    let fch3 = rx33.recv().unwrap();
 
     sum_ch(&fch1, &fch2, &fch3)
 }

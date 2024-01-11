@@ -42,9 +42,12 @@ impl QrsForm<'_> {
                 let max_cor1 = max_vec(&coef_cor1);
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
-                if max_cor1 > 0.955 || max_cor2 > 0.955 || max_cor3 > 0.955 {
+                // if i < 20 {
+                //     println!("{} {} {}", max_cor1, max_cor2, max_cor3);
+                // }
+                if max_cor1 > 0.945 || max_cor2 > 0.945 || max_cor3 > 0.945 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
-                } else if max_cor1 > 0.84 && max_cor2 > 0.84 && max_cor3 > 0.84 {
+                } else if max_cor1 > 0.83 && max_cor2 > 0.83 && max_cor3 > 0.83 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
                 } else {
                     rem_out.push(rem_indexes[i]);
@@ -65,7 +68,7 @@ impl QrsForm<'_> {
                 }
             }
             self.mean_div_intervals = sum_div / count_div as f32;
-            println!("{}", count_div);
+            // println!("{}", count_div);
         }
     }
 }
@@ -108,7 +111,7 @@ impl Forms<'_> {
             ref_qrs3: vec![],
         };
 
-        // println!("Всего R: {}", intervals.ind_r.len());
+        println!("Всего R: {}", intervals.ind_r.len());
 
         let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
         let mut ind_num_types = vec![0; intervals.ind_r.len()];
@@ -116,10 +119,10 @@ impl Forms<'_> {
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
         rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
-        if self.form1.mean_div_intervals >= 0.85 {
+        if self.form1.mean_div_intervals >= 0.95 {
             self.form1.form_char = "N";
         }
-        if (self.form1.mean_div_intervals < 0.85) && (self.form1.mean_div_intervals > 0.1) {
+        if (self.form1.mean_div_intervals < 0.95) && (self.form1.mean_div_intervals > 0.1) {
             self.form1.form_char = "V";
         }
         for i in 0..self.form1.form_indexes.len() {
@@ -130,10 +133,10 @@ impl Forms<'_> {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form2.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form2.mean_div_intervals >= 0.85 {
+            if self.form2.mean_div_intervals >= 0.95 {
                 self.form2.form_char = "N";
             }
-            if (self.form2.mean_div_intervals < 0.85) && (self.form2.mean_div_intervals > 0.1) {
+            if (self.form2.mean_div_intervals < 0.95) && (self.form2.mean_div_intervals > 0.1) {
                 self.form2.form_char = "V";
             }
             for i in 0..self.form2.form_indexes.len() {
@@ -144,10 +147,10 @@ impl Forms<'_> {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form3.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form3.mean_div_intervals >= 0.85 {
+            if self.form3.mean_div_intervals >= 0.95 {
                 self.form3.form_char = "N";
             }
-            if (self.form3.mean_div_intervals < 0.85) && (self.form3.mean_div_intervals > 0.1) {
+            if (self.form3.mean_div_intervals < 0.95) && (self.form3.mean_div_intervals > 0.1) {
                 self.form3.form_char = "V";
             }
             for i in 0..self.form3.form_indexes.len() {
@@ -158,10 +161,10 @@ impl Forms<'_> {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form4.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form4.mean_div_intervals >= 0.85 {
+            if self.form4.mean_div_intervals >= 0.95 {
                 self.form4.form_char = "N";
             }
-            if (self.form4.mean_div_intervals < 0.85) && (self.form4.mean_div_intervals > 0.1) {
+            if (self.form4.mean_div_intervals < 0.95) && (self.form4.mean_div_intervals > 0.1) {
                 self.form4.form_char = "V";
             }
             for i in 0..self.form4.form_indexes.len() {
@@ -172,10 +175,10 @@ impl Forms<'_> {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form5.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form5.mean_div_intervals >= 0.85 {
+            if self.form5.mean_div_intervals >= 0.95 {
                 self.form5.form_char = "N";
             }
-            if (self.form5.mean_div_intervals < 0.85) && (self.form5.mean_div_intervals > 0.1) {
+            if (self.form5.mean_div_intervals < 0.95) && (self.form5.mean_div_intervals > 0.1) {
                 self.form5.form_char = "V";
             }
             for i in 0..self.form5.form_indexes.len() {
@@ -185,11 +188,12 @@ impl Forms<'_> {
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+
             self.form6.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form6.mean_div_intervals >= 0.85 {
+            if self.form6.mean_div_intervals >= 0.95 {
                 self.form6.form_char = "N";
             }
-            if (self.form6.mean_div_intervals < 0.85) && (self.form6.mean_div_intervals > 0.1) {
+            if (self.form6.mean_div_intervals < 0.95) && (self.form6.mean_div_intervals > 0.1) {
                 self.form6.form_char = "V";
             }
             for i in 0..self.form6.form_indexes.len() {
@@ -199,11 +203,12 @@ impl Forms<'_> {
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+
             self.form7.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form7.mean_div_intervals >= 0.85 {
+            if self.form7.mean_div_intervals >= 0.95 {
                 self.form7.form_char = "N";
             }
-            if (self.form7.mean_div_intervals < 0.85) && (self.form7.mean_div_intervals > 0.1) {
+            if (self.form7.mean_div_intervals < 0.95) && (self.form7.mean_div_intervals > 0.1) {
                 self.form7.form_char = "V";
             }
             for i in 0..self.form7.form_indexes.len() {
@@ -213,11 +218,12 @@ impl Forms<'_> {
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+
             self.form8.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form8.mean_div_intervals >= 0.85 {
+            if self.form8.mean_div_intervals >= 0.95 {
                 self.form8.form_char = "N";
             }
-            if (self.form8.mean_div_intervals < 0.85) && (self.form8.mean_div_intervals > 0.1) {
+            if (self.form8.mean_div_intervals < 0.95) && (self.form8.mean_div_intervals > 0.1) {
                 self.form8.form_char = "V";
             }
             for i in 0..self.form8.form_indexes.len() {
@@ -227,11 +233,12 @@ impl Forms<'_> {
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
             let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+
             self.form9.get_mean_div_intervals(&intervals.div_intervals);
-            if self.form9.mean_div_intervals >= 0.85 {
+            if self.form9.mean_div_intervals >= 0.95 {
                 self.form9.form_char = "N";
             }
-            if (self.form9.mean_div_intervals < 0.85) && (self.form9.mean_div_intervals > 0.1) {
+            if (self.form9.mean_div_intervals < 0.95) && (self.form9.mean_div_intervals > 0.1) {
                 self.form9.form_char = "V";
             }
             for i in 0..self.form9.form_indexes.len() {
@@ -260,7 +267,7 @@ impl Forms<'_> {
                 7 => self.form7.form_char,
                 8 => self.form8.form_char,
                 9 => self.form9.form_char,
-                _ => "U",
+                _ => "A",
             };
             let text1 = format!("{};{};{}\n", &intervals.ind_r[i], &intervals.intervals_r[i], arg3);
             let (encoded_text, _encoding_used, _errors) = WINDOWS_1251.encode(&text1);

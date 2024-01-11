@@ -17,7 +17,7 @@ impl RefQrs {
                 if ind_qrs < 45 {
                     continue;
                 }
-                if ind_qrs > ind_r.len() - 47 {
+                if ind_qrs1 > &leads.lead1.len() - 68 {
                     continue;
                 }
 
@@ -46,7 +46,7 @@ impl RefQrs {
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
 
-                if max_cor1 > 0.93 && max_cor2 > 0.93 && max_cor3 > 0.93 {
+                if max_cor1 > 0.92 && max_cor2 > 0.92 && max_cor3 > 0.92 {
                     self.ref_qrs1 = qrs1.to_owned();
                     self.ref_qrs2 = qrs2.to_owned();
                     self.ref_qrs3 = qrs3.to_owned();

@@ -35,14 +35,14 @@ impl IntervalsR {
             intervals.intervals_r.remove(0);
 
         }
-        while (sum_leads.len() - intervals.ind_r[intervals.ind_r.len() - 1]) < 55 {
+        while (sum_leads.len() - intervals.ind_r[intervals.ind_r.len() - 1]) < 70 {
             intervals.ind_r.remove(intervals.ind_r.len() - 1);
             intervals.intervals_r.remove(intervals.ind_r.len() - 1);
         }
-        if (sum_leads.len() - intervals.ind_r[intervals.ind_r.len() - 1]) < 40 {
-            intervals.ind_r.remove(intervals.ind_r.len() - 1);
-            intervals.intervals_r.remove(intervals.ind_r.len() - 1);
-        }
+        // if (sum_leads.len() - intervals.ind_r[intervals.ind_r.len() - 1]) < 40 {
+        //     intervals.ind_r.remove(intervals.ind_r.len() - 1);
+        //     intervals.intervals_r.remove(intervals.ind_r.len() - 1);
+        // }
         if !intervals.intervals_r.is_empty() {
             let mut temp = intervals.intervals_r.to_owned();
             temp.push(temp[temp.len() - 1]);

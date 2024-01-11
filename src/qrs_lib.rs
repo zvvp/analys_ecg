@@ -2,7 +2,7 @@ use ndarray::Array1;
 
 fn norm_qrs(qrs: &Vec<f32>) -> Vec<f32> {
     let mut min: f32 = 0.0;
-    let mut max: f32 = 0.0;
+    // let mut max: f32 = 0.0;
     let mut out = qrs.to_owned();
     for i in 0..out.len() {
         if out[i] < min {
@@ -12,16 +12,16 @@ fn norm_qrs(qrs: &Vec<f32>) -> Vec<f32> {
     for i in 0..out.len() {
         out[i] -= min;
     }
-    for i in 0..out.len() {
-        if out[i] > max {
-            max = out[i];
-        }
-    }
-    if max != 0.0 {
-        for i in 0..out.len() {
-            out[i] /= max;
-        }
-    }
+    // for i in 0..out.len() {
+    //     if out[i] > max {
+    //         max = out[i];
+    //     }
+    // }
+    // if max != 0.0 {
+    //     for i in 0..out.len() {
+    //         out[i] /= max;
+    //     }
+    // }
     out
 }
 
@@ -37,11 +37,10 @@ pub fn get_coef_cor(x: &Vec<f32>, y: &Vec<f32>) -> f32 {
     let std_x = &arr_x.std(0.0);
     let std_y = &arr_y.std(0.0);
     let std_xy = std_x * std_y;
-    // let mut out: f32 = 0.0;
+
     if std_xy != 0.0 {
         (mean_xy - mean_x * mean_y) / std_xy
     } else { 0.0 }
-    // out
 }
 
 // pub fn max_cor(cor1: f32, cor2: f32, cor3: f32) -> f32 {
