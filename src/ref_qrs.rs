@@ -55,4 +55,7 @@ impl RefQrs {
             }
         }
     }
+    // pub fn pre_proc_ref(&self, leads: &Ecg, qrsstart_index1: usize, end_index1: usize) -> f32 {
+    //
+    // }
 }

@@ -328,6 +328,17 @@ pub fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
     out
 }
 
+fn pre_proc_lead(ch: &Vec<f32>) -> Vec<f32> {
+    let ch = clean_ch(&ch);
+    let p2p_ch = get_p2p(&ch, 40, false);
+    let art = del_artifacts(&ch, &p2p_ch);
+    let ch = del_isoline(&art.0);
+    let fch = del_nouse(&ch, &art.1);
+    let fch = get_p2p(&fch, 30, true);
+    let fch = filt_r(&fch);
+    fch
+}
+
 pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
     let ch1 = leads.lead1.to_owned();
     let ch2 = leads.lead2.to_owned();
@@ -342,38 +353,20 @@ pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
 
     tx1.send(ch1).unwrap();
     thread::spawn(move || {
-        let received = rx1.recv().unwrap();
-        let ch = clean_ch(&received);
-        let p2p_ch = get_p2p(&ch, 40, false);
-        let art = del_artifacts(&ch, &p2p_ch);
-        let ch = del_isoline(&art.0);
-        let fch = del_nouse(&ch, &art.1);
-        let fch = get_p2p(&fch, 30, true);
-        let fch = filt_r(&fch);
+        let received= rx1.recv().unwrap();
+        let fch= pre_proc_lead(&received);
         tx11.send(fch).unwrap();
     });
     tx2.send(ch2).unwrap();
     thread::spawn(move || {
         let received = rx2.recv().unwrap();
-        let ch = clean_ch(&received);
-        let p2p_ch = get_p2p(&ch, 40, false);
-        let art = del_artifacts(&ch, &p2p_ch);
-        let ch = del_isoline(&art.0);
-        let fch = del_nouse(&ch, &art.1);
-        let fch = get_p2p(&fch, 30, true);
-        let fch = filt_r(&fch);
+        let fch= pre_proc_lead(&received);
         tx22.send(fch).unwrap();
     });
     tx3.send(ch3).unwrap();
     thread::spawn(move || {
         let received = rx3.recv().unwrap();
-        let ch = clean_ch(&received);
-        let p2p_ch = get_p2p(&ch, 40, false);
-        let art = del_artifacts(&ch, &p2p_ch);
-        let ch = del_isoline(&art.0);
-        let fch = del_nouse(&ch, &art.1);
-        let fch = get_p2p(&fch, 30, true);
-        let fch = filt_r(&fch);
+        let fch= pre_proc_lead(&received);
         tx33.send(fch).unwrap();
     });
 
