@@ -8,7 +8,7 @@ pub struct RefQrs {
 }
 
 impl RefQrs {
-    pub fn get_ref_forms(&mut self, leads: &Ecg, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) {
+    pub fn get_ref_forms(&mut self, leads: &Ecg, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>, trs: f32) {
         if rem_indexes.len() > 1 {
             for i in 0..rem_indexes.len() - 1 {
                 let ind_qrs = ind_r[rem_indexes[i]];
@@ -45,8 +45,8 @@ impl RefQrs {
                 let max_cor1 = max_vec(&coef_cor1);
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
-
-                if max_cor1 > 0.92 && max_cor2 > 0.92 && max_cor3 > 0.92 {
+                // trs = 0.92
+                if max_cor1 > trs && max_cor2 > trs && max_cor3 > trs {
                     self.ref_qrs1 = qrs1.to_owned();
                     self.ref_qrs2 = qrs2.to_owned();
                     self.ref_qrs3 = qrs3.to_owned();

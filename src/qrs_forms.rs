@@ -116,7 +116,7 @@ impl Forms<'_> {
         let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
         let mut ind_num_types = vec![0; intervals.ind_r.len()];
 
-        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+        refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.92);
         rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
         if self.form1.mean_div_intervals >= 0.95 {
@@ -130,7 +130,7 @@ impl Forms<'_> {
         }
 
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.92);
             rem = self.form2.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form2.get_mean_div_intervals(&intervals.div_intervals);
             if self.form2.mean_div_intervals >= 0.95 {
@@ -144,7 +144,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.89);
             rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form3.get_mean_div_intervals(&intervals.div_intervals);
             if self.form3.mean_div_intervals >= 0.95 {
@@ -158,7 +158,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.86);
             rem = self.form4.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form4.get_mean_div_intervals(&intervals.div_intervals);
             if self.form4.mean_div_intervals >= 0.95 {
@@ -172,7 +172,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.83);
             rem = self.form5.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form5.get_mean_div_intervals(&intervals.div_intervals);
             if self.form5.mean_div_intervals >= 0.95 {
@@ -186,7 +186,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.81);
             rem = self.form6.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
 
             self.form6.get_mean_div_intervals(&intervals.div_intervals);
@@ -201,7 +201,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.80);
             rem = self.form7.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
 
             self.form7.get_mean_div_intervals(&intervals.div_intervals);
@@ -216,7 +216,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.80);
             rem = self.form8.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
 
             self.form8.get_mean_div_intervals(&intervals.div_intervals);
@@ -231,7 +231,7 @@ impl Forms<'_> {
             }
         }
         if !rem.is_empty() {
-            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r);
+            refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.8);
             let _rem = self.form9.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
 
             self.form9.get_mean_div_intervals(&intervals.div_intervals);
