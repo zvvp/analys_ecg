@@ -47,7 +47,7 @@ fn cut_impuls1(ch: &Vec<f32>) -> Vec<f32> {
         let abs2 = d_out2.abs();
         if (sign0 != sign1) && (sign1 != sign2) && (abs1 > 1.4)
             && (((abs0 - abs1).abs() < abs1 * 0.88) || ((abs1 - abs2).abs() < abs1 * 0.88)) {
-            let win: Vec<&f32> = ch.iter().skip(i-5).take(11).collect();
+            let win: Vec<&f32> = ch.iter().skip(i - 5).take(11).collect();
             let mut sort_win = win.to_owned();
             sort_win.sort_by(|a, b| a.partial_cmp(b).unwrap());
             out[i - 2] = *sort_win[5];
@@ -62,7 +62,7 @@ fn cut_impuls1(ch: &Vec<f32>) -> Vec<f32> {
             }
         }
         if (sign0 != sign1) && (abs0 > 1.0) && (abs1 > 1.0) && ((abs0 - abs1).abs() < (abs0 + abs1) * 0.5) {
-            let win: Vec<&f32> = ch.iter().skip(i-5).take(11).collect();
+            let win: Vec<&f32> = ch.iter().skip(i - 5).take(11).collect();
             let mut sort_win = win.to_owned();
             sort_win.sort_by(|a, b| a.partial_cmp(b).unwrap());
             out[i - 2] = *sort_win[5];
@@ -352,27 +352,30 @@ pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
     let (tx33, rx33) = mpsc::channel::<Vec<f32>>();
 
     tx1.send(ch1).unwrap();
-    thread::spawn(move || {
-        let received= rx1.recv().unwrap();
-        let fch= pre_proc_lead(&received);
+    let t1 = thread::spawn(move || {
+        let received = rx1.recv().unwrap();
+        let fch = pre_proc_lead(&received);
         tx11.send(fch).unwrap();
     });
     tx2.send(ch2).unwrap();
-    thread::spawn(move || {
+    let t2 = thread::spawn(move || {
         let received = rx2.recv().unwrap();
-        let fch= pre_proc_lead(&received);
+        let fch = pre_proc_lead(&received);
         tx22.send(fch).unwrap();
     });
     tx3.send(ch3).unwrap();
-    thread::spawn(move || {
+    let t3 = thread::spawn(move || {
         let received = rx3.recv().unwrap();
-        let fch= pre_proc_lead(&received);
+        let fch = pre_proc_lead(&received);
         tx33.send(fch).unwrap();
     });
 
     let fch1 = rx11.recv().unwrap();
     let fch2 = rx22.recv().unwrap();
     let fch3 = rx33.recv().unwrap();
+    t1.join().unwrap();
+    t2.join().unwrap();
+    t3.join().unwrap();
 
     sum_ch(&fch1, &fch2, &fch3)
 }

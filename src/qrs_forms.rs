@@ -7,6 +7,7 @@ use crate::ref_qrs::RefQrs;
 use std::io::prelude::*;
 use std::io::BufWriter;
 use encoding_rs::WINDOWS_1251;
+use std::time::Instant;
 
 pub struct QrsForm<'a> {
     pub form_indexes: Vec<usize>,
@@ -23,6 +24,7 @@ impl QrsForm<'_> {
         }
     }
     pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
+        let start = Instant::now();
         let mut rem_out = vec![];
         if rem_indexes.len() > 10 {
             for i in 0..rem_indexes.len() {
@@ -42,18 +44,24 @@ impl QrsForm<'_> {
                 let max_cor1 = max_vec(&coef_cor1);
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
-                // if i < 20 {
+                // if i < 30 {
                 //     println!("{} {} {}", max_cor1, max_cor2, max_cor3);
                 // }
                 if max_cor1 > 0.945 || max_cor2 > 0.945 || max_cor3 > 0.945 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
                 } else if max_cor1 > 0.83 && max_cor2 > 0.83 && max_cor3 > 0.83 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
+                } else if (max_cor1 > 0.86 && max_cor2 > 0.86 && max_cor3 > 0.7)
+                || (max_cor1 > 0.86 && max_cor2 > 0.7 && max_cor3 > 0.86)
+                || (max_cor1 > 0.7 && max_cor2 > 0.86 && max_cor3 > 0.86) {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
                 } else {
                     rem_out.push(rem_indexes[i]);
                 }
             }
         }
+        let duration = start.elapsed().as_millis();
+        println!("Время выполнения get_form_indexes: {} ms", duration);
         rem_out
     }
 
@@ -102,8 +110,14 @@ impl Forms<'_> {
 
     pub fn get_types_qrs(&mut self) -> Vec<i32> {
         let mut leads = Ecg::new();
+        // let start = Instant::now();
         let sum_leads = pre_proc_r(&mut leads);
+        // let duration = start.elapsed().as_millis();
+        // println!("Время выполнения pre_proc_r: {} ms", duration);
+        // let start = Instant::now();
         let intervals = IntervalsR::new(&sum_leads);
+        // let duration = start.elapsed().as_millis();
+        // println!("Время выполнения IntervalsR: {} ms", duration);
 
         let mut refqrs = RefQrs {
             ref_qrs1: vec![],
@@ -116,8 +130,14 @@ impl Forms<'_> {
         let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
         let mut ind_num_types = vec![0; intervals.ind_r.len()];
 
+        // let start = Instant::now();
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.92);
+        // let duration = start.elapsed().as_millis();
+        // println!("Время выполнения get_ref_forms: {} ms", duration);
+        // let start = Instant::now();
         rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
+        // let duration = start.elapsed().as_millis();
+        // println!("Время выполнения get_form_indexes: {} ms", duration);
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
         if self.form1.mean_div_intervals >= 0.95 {
             self.form1.form_char = "N";
@@ -256,7 +276,6 @@ impl Forms<'_> {
             .expect("Не удалось записать в файл");
 
         for i in 0..intervals.ind_r.len() {
-
             let arg3 = match &ind_num_types[i] {
                 1 => self.form1.form_char,
                 2 => self.form2.form_char,
