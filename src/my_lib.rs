@@ -344,38 +344,27 @@ pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
     let ch2 = leads.lead2.to_owned();
     let ch3 = leads.lead3.to_owned();
 
-    let (tx1, rx1) = mpsc::channel::<Vec<f32>>();
-    let (tx11, rx11) = mpsc::channel::<Vec<f32>>();
-    let (tx2, rx2) = mpsc::channel::<Vec<f32>>();
-    let (tx22, rx22) = mpsc::channel::<Vec<f32>>();
-    let (tx3, rx3) = mpsc::channel::<Vec<f32>>();
-    let (tx33, rx33) = mpsc::channel::<Vec<f32>>();
-
-    tx1.send(ch1).unwrap();
     let t1 = thread::spawn(move || {
-        let received = rx1.recv().unwrap();
-        let fch = pre_proc_lead(&received);
-        tx11.send(fch).unwrap();
-    });
-    tx2.send(ch2).unwrap();
-    let t2 = thread::spawn(move || {
-        let received = rx2.recv().unwrap();
-        let fch = pre_proc_lead(&received);
-        tx22.send(fch).unwrap();
-    });
-    tx3.send(ch3).unwrap();
-    let t3 = thread::spawn(move || {
-        let received = rx3.recv().unwrap();
-        let fch = pre_proc_lead(&received);
-        tx33.send(fch).unwrap();
+        let ch = ch1;
+        let fch = pre_proc_lead(&ch);
+        fch
     });
 
-    let fch1 = rx11.recv().unwrap();
-    let fch2 = rx22.recv().unwrap();
-    let fch3 = rx33.recv().unwrap();
-    t1.join().unwrap();
-    t2.join().unwrap();
-    t3.join().unwrap();
+    let t2 = thread::spawn(move || {
+        let ch = ch2;
+        let fch = pre_proc_lead(&ch);
+        fch
+    });
+
+    let t3 = thread::spawn(move || {
+        let ch = ch3;
+        let fch = pre_proc_lead(&ch);
+        fch
+    });
+
+    let fch1 = t1.join().unwrap();
+    let fch2 = t2.join().unwrap();
+    let fch3 = t3.join().unwrap();
 
     sum_ch(&fch1, &fch2, &fch3)
 }

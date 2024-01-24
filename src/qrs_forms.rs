@@ -8,6 +8,8 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 use encoding_rs::WINDOWS_1251;
 use std::time::Instant;
+use std::thread;
+
 
 pub struct QrsForm<'a> {
     pub form_indexes: Vec<usize>,
@@ -23,10 +25,130 @@ impl QrsForm<'_> {
             form_char: "",
         }
     }
-    pub fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
+
+    pub  fn get_form_indexes(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
         let start = Instant::now();
         let mut rem_out = vec![];
-        if rem_indexes.len() > 10 {
+
+        if rem_indexes.len() > 1 {
+            for i in 0..rem_indexes.len() {
+                let ind_qrs = ind_r[rem_indexes[i]];
+                let ind_start = ind_qrs - 45;
+                let ind_stop = ind_qrs + 67;
+                let qrs_area1 = leads.lead1[ind_start..ind_stop].to_vec();
+                let qrs_area2 = leads.lead2[ind_start..ind_stop].to_vec();
+                let qrs_area3 = leads.lead3[ind_start..ind_stop].to_vec();
+                let mut coef_cor1 = vec![0.0; 41];
+                let mut coef_cor2 = vec![0.0; 41];
+                let mut coef_cor3 = vec![0.0; 41];
+                for i in 0..40 {
+                    let qrs1 = qrs_area1[i..i+71].to_vec();
+                    coef_cor1[i] = get_coef_cor(&qrs1, &refs.ref_qrs1);
+                    let qrs2 = qrs_area2[i..i+71].to_vec();
+                    coef_cor2[i] = get_coef_cor(&qrs2, &refs.ref_qrs2);
+                    let qrs3 = qrs_area3[i..i+71].to_vec();
+                    coef_cor3[i] = get_coef_cor(&qrs3, &refs.ref_qrs3);
+                }
+                let max_cor1 = max_vec(&coef_cor1);
+                let max_cor2 = max_vec(&coef_cor2);
+                let max_cor3 = max_vec(&coef_cor3);
+
+                if max_cor1 > 0.945 || max_cor2 > 0.945 || max_cor3 > 0.945 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else if max_cor1 > 0.83 && max_cor2 > 0.83 && max_cor3 > 0.83 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else if (max_cor1 > 0.86 && max_cor2 > 0.86 && max_cor3 > 0.7)
+                    || (max_cor1 > 0.86 && max_cor2 > 0.7 && max_cor3 > 0.86)
+                    || (max_cor1 > 0.7 && max_cor2 > 0.86 && max_cor3 > 0.86) {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else {
+                    rem_out.push(rem_indexes[i]);
+                }
+            }
+        }
+        let duration = start.elapsed().as_millis();
+        println!("Время выполнения get_form_indexes: {} ms", duration);
+        rem_out
+    }
+
+    pub  fn get_form_indexes1(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
+        let start = Instant::now();
+        let mut rem_out = vec![];
+
+        if rem_indexes.len() > 1 {
+            for i in 0..rem_indexes.len() {
+                let ind_qrs = ind_r[rem_indexes[i]];
+                let ind_start = ind_qrs - 45;
+                let ind_stop = ind_qrs + 67;
+
+                let qrs_area1 = leads.lead1[ind_start..ind_stop].to_vec();
+                let qrs_area2 = leads.lead2[ind_start..ind_stop].to_vec();
+                let qrs_area3 = leads.lead3[ind_start..ind_stop].to_vec();
+                let ref1 = refs.ref_qrs1.to_owned();
+                let ref2 = refs.ref_qrs2.to_owned();
+                let ref3 = refs.ref_qrs3.to_owned();
+
+                let t1 = thread::spawn(move || {
+                    let mut coef_cor = vec![0.0; 41];
+                    for i in 0..40 {
+                        let qrs = qrs_area1[i..i+71].to_vec();
+                        coef_cor[i] = get_coef_cor(&qrs, &ref1);
+                    }
+                    let max_cor = max_vec(&coef_cor);
+                    max_cor
+                });
+                let t2 = thread::spawn(move || {
+                    let mut coef_cor = vec![0.0; 41];
+                    for i in 0..40 {
+                        let qrs = qrs_area2[i..i+71].to_vec();
+                        coef_cor[i] = get_coef_cor(&qrs, &ref2);
+                    }
+                    let max_cor = max_vec(&coef_cor);
+                    max_cor
+                });
+                let t3 = thread::spawn(move || {
+                    let mut coef_cor = vec![0.0; 41];
+                    for i in 0..40 {
+                        let qrs = qrs_area3[i..i+71].to_vec();
+                        coef_cor[i] = get_coef_cor(&qrs, &ref3);
+                    }
+                    let max_cor = max_vec(&coef_cor);
+                    max_cor
+                });
+
+                let max_cor1 = t1.join().unwrap_or(0.0);
+                let max_cor2 = t2.join().unwrap_or(0.0);
+                let max_cor3 = t3.join().unwrap_or(0.0);
+
+                if max_cor1 > 0.945 || max_cor2 > 0.945 || max_cor3 > 0.945 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else if max_cor1 > 0.83 && max_cor2 > 0.83 && max_cor3 > 0.83 {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else if (max_cor1 > 0.86 && max_cor2 > 0.86 && max_cor3 > 0.7)
+                    || (max_cor1 > 0.86 && max_cor2 > 0.7 && max_cor3 > 0.86)
+                    || (max_cor1 > 0.7 && max_cor2 > 0.86 && max_cor3 > 0.86) {
+                    let _ = &self.form_indexes.push(rem_indexes[i]);
+
+                } else {
+                    rem_out.push(rem_indexes[i]);
+                }
+            }
+        }
+        let duration = start.elapsed().as_millis();
+        println!("Время выполнения get_form_indexes: {} ms", duration);
+        rem_out
+    }
+
+
+    pub fn get_form_indexes2(&mut self, leads: &Ecg, refs: &RefQrs, rem_indexes: &Vec<usize>, ind_r: &Vec<usize>) -> Vec<usize> {
+        let start = Instant::now();
+        let mut rem_out = vec![];
+        if rem_indexes.len() > 1 {
             for i in 0..rem_indexes.len() {
                 let mut coef_cor1 = vec![0.0; 41];
                 let mut coef_cor2 = vec![0.0; 41];
@@ -44,17 +166,18 @@ impl QrsForm<'_> {
                 let max_cor1 = max_vec(&coef_cor1);
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
-                // if i < 30 {
-                //     println!("{} {} {}", max_cor1, max_cor2, max_cor3);
-                // }
+
                 if max_cor1 > 0.945 || max_cor2 > 0.945 || max_cor3 > 0.945 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
+                    // c_945 += 1;
                 } else if max_cor1 > 0.83 && max_cor2 > 0.83 && max_cor3 > 0.83 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
+                    // c_83 += 1;
                 } else if (max_cor1 > 0.86 && max_cor2 > 0.86 && max_cor3 > 0.7)
                 || (max_cor1 > 0.86 && max_cor2 > 0.7 && max_cor3 > 0.86)
                 || (max_cor1 > 0.7 && max_cor2 > 0.86 && max_cor3 > 0.86) {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
+                    // c_86 += 1;
                 } else {
                     rem_out.push(rem_indexes[i]);
                 }
@@ -110,10 +233,10 @@ impl Forms<'_> {
 
     pub fn get_types_qrs(&mut self) -> Vec<i32> {
         let mut leads = Ecg::new();
-        // let start = Instant::now();
+        let start = Instant::now();
         let sum_leads = pre_proc_r(&mut leads);
-        // let duration = start.elapsed().as_millis();
-        // println!("Время выполнения pre_proc_r: {} ms", duration);
+        let duration = start.elapsed().as_millis();
+        println!("Время выполнения pre_proc_r: {} ms", duration);
         // let start = Instant::now();
         let intervals = IntervalsR::new(&sum_leads);
         // let duration = start.elapsed().as_millis();
@@ -130,10 +253,10 @@ impl Forms<'_> {
         let mut rem: Vec<usize> = (0..intervals.ind_r.len()).collect();
         let mut ind_num_types = vec![0; intervals.ind_r.len()];
 
-        // let start = Instant::now();
+        let start = Instant::now();
         refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.92);
-        // let duration = start.elapsed().as_millis();
-        // println!("Время выполнения get_ref_forms: {} ms", duration);
+        let duration = start.elapsed().as_millis();
+        println!("Время выполнения get_ref_forms: {} ms", duration);
         // let start = Instant::now();
         rem = self.form1.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
         // let duration = start.elapsed().as_millis();
