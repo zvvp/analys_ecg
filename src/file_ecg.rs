@@ -2,14 +2,6 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-// struct Pacient {
-//     time: String,
-//     date: String,
-//     pacient: String,
-//     age: String,
-//     number_room: String,
-//     number_history: String,
-// }
 
 pub struct Ecg {
     pub file_name: PathBuf,

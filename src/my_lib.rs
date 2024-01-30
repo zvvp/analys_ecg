@@ -1,5 +1,4 @@
 use crate::file_ecg::Ecg;
-use std::sync::mpsc;
 use std::thread;
 
 fn my_diff(ch: &Vec<f32>) -> Vec<f32> {
@@ -308,6 +307,88 @@ fn sum_ch(ch1: &Vec<f32>, ch2: &Vec<f32>, ch3: &Vec<f32>) -> Vec<f32> {
     sum_ch
 }
 
+pub fn multi_del_isoline(ch: &Vec<f32>) -> Vec<f32> {
+    let len_part = &ch.len() / 8;
+
+    let part1 = ch[0..len_part].into();
+    let part2 = ch[len_part..len_part * 2].into();
+    let part3 = ch[len_part * 2..len_part * 3].into();
+    let part4 = ch[len_part * 3..len_part * 4].into();
+    let part5 = ch[len_part * 4..len_part * 5].into();
+    let part6 = ch[len_part * 5..len_part * 6].into();
+    let part7 = ch[len_part * 6..len_part * 7].into();
+    let part8 = ch[len_part * 7..ch.len()].into();
+
+    let t1 = thread::spawn(move || {
+        let fragment = part1;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t2 = thread::spawn(move || {
+        let fragment = part2;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t3 = thread::spawn(move || {
+        let fragment = part3;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t4 = thread::spawn(move || {
+        let fragment = part4;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t5 = thread::spawn(move || {
+        let fragment = part5;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t6 = thread::spawn(move || {
+        let fragment = part6;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t7 = thread::spawn(move || {
+        let fragment = part7;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let t8 = thread::spawn(move || {
+        let fragment = part8;
+        let fch = del_isoline(&fragment);
+        fch
+    });
+
+    let fch1 = t1.join().unwrap();
+    let fch2 = t2.join().unwrap();
+    let fch3 = t3.join().unwrap();
+    let fch4 = t4.join().unwrap();
+    let fch5 = t5.join().unwrap();
+    let fch6 = t6.join().unwrap();
+    let fch7 = t7.join().unwrap();
+    let fch8 = t8.join().unwrap();
+
+    let mut flat_ch = vec![];
+    flat_ch.extend(fch1);
+    flat_ch.extend(fch2);
+    flat_ch.extend(fch3);
+    flat_ch.extend(fch4);
+    flat_ch.extend(fch5);
+    flat_ch.extend(fch6);
+    flat_ch.extend(fch7);
+    flat_ch.extend(fch8);
+
+    flat_ch
+}
+
 pub fn del_isoline(ch: &Vec<f32>) -> Vec<f32> {
     let len_win = 120;
     let mut out = ch.to_owned();
@@ -332,12 +413,20 @@ fn pre_proc_lead(ch: &Vec<f32>) -> Vec<f32> {
     let ch = clean_ch(&ch);
     let p2p_ch = get_p2p(&ch, 40, false);
     let art = del_artifacts(&ch, &p2p_ch);
-    let ch = del_isoline(&art.0);
+    let ch = multi_del_isoline(&art.0);
+    // ch
     let fch = del_nouse(&ch, &art.1);
     let fch = get_p2p(&fch, 30, true);
     let fch = filt_r(&fch);
     fch
 }
+
+// fn get_fch(ch: &Vec<f32>, art: &Vec<f32>) -> Vec<f32> {
+//     let fch = del_nouse(&ch, &art);
+//     let fch = get_p2p(&fch, 30, true);
+//     let fch = filt_r(&fch);
+//     fch
+// }
 
 pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
     let ch1 = leads.lead1.to_owned();
