@@ -32,7 +32,7 @@ impl QrsForm<'_> {
         let mut rem_out = vec![];
         let mut count1 = 0;
         let mut count2 = 0;
-        let mut count3 = 0;
+        // let mut count3 = 0;
         if rem_indexes.len() > 1 {
             for i in 0..rem_indexes.len() {
                 let ind_qrs = ind_r[rem_indexes[i]];
@@ -56,27 +56,22 @@ impl QrsForm<'_> {
                 let max_cor2 = max_vec(&coef_cor2);
                 let max_cor3 = max_vec(&coef_cor3);
 
-                if max_cor1 > 0.95 || max_cor2 > 0.95 || max_cor3 > 0.95 {   // 0.945
+                // if (ind_r[rem_indexes[i]] > 64200) && (ind_r[rem_indexes[i]] < 64600) {
+                //     println!("{} {} = {}, {}, {}", ind_r[rem_indexes[i]], max_cor1 + max_cor2 + max_cor3, max_cor1, max_cor2, max_cor3)
+                // }
+
+                if max_cor1 > 0.97 || max_cor2 > 0.97 || max_cor3 > 0.97 {   // 0.945
                     let _ = &self.form_indexes.push(rem_indexes[i]);
                     count1 += 1;
-                } else if max_cor1 > 0.88 && max_cor2 > 0.88 && max_cor3 > 0.88 { // 0.83
+                } else if max_cor1 + max_cor2 + max_cor3 > 2.5 {
                     let _ = &self.form_indexes.push(rem_indexes[i]);
                     count2 += 1;
-                } else if (max_cor1 > 0.91 && max_cor2 > 0.91 && max_cor3 > 0.2) // 0.86 0.7
-                    || (max_cor1 > 0.91 && max_cor2 > 0.2 && max_cor3 > 0.91)
-                    || (max_cor1 > 0.2 && max_cor2 > 0.91 && max_cor3 > 0.91) {
-                    let _ = &self.form_indexes.push(rem_indexes[i]);
-                    count3 += 1;
                 } else {
                     rem_out.push(rem_indexes[i]);
-                    // if (ind_r[rem_indexes[i]] > 22800) && (ind_r[rem_indexes[i]] < 23200) {
-                    //     println!("{} = {}, {}, {}", ind_r[rem_indexes[i]], max_cor1, max_cor2, max_cor3)
-                    // }
                 }
-
             }
         }
-        println!("{}, {}, {}", count1, count2, count3);
+        println!("{}, {}", count1, count2);
         let duration = start.elapsed().as_millis();
         println!("Время выполнения get_form_indexes: {} ms", duration);
         rem_out
@@ -88,8 +83,10 @@ impl QrsForm<'_> {
             let mut sum: usize = 0;
             let mut mean_intervals: f32 = 0.0;
             for item in &self.form_indexes {
-                sum += &intervals[*item];
-                count += 1;
+                if (intervals[*item] < 500) && (intervals[*item] > 60) {
+                    sum += &intervals[*item];
+                    count += 1;
+                }
             }
             mean_intervals = sum as f32 / count as f32;
             self.mean_double_intervals = mean_intervals;
@@ -177,15 +174,17 @@ impl Forms<'_> {
         self.form1.get_mean_div_intervals(&intervals.div_intervals);
         self.form1.get_mean_double_intervals(&intervals.intervals_r);
         let deviation1 = self.form1.mean_double_intervals / intervals.mean_intervals_r;
-        if self.form1.mean_div_intervals >= 0.94 {
+        let trs_div_intervals:f32 = 0.97;
+        if self.form1.mean_div_intervals >= trs_div_intervals {
             self.form1.form_char = "N";
         }
-        if (self.form1.mean_div_intervals < 0.94) && (self.form1.mean_div_intervals > 0.1) {
+        if (self.form1.mean_div_intervals < trs_div_intervals) && (self.form1.mean_div_intervals > 0.1) {
             self.form1.form_char = "V";
         }
-        if deviation1 < 0.65 {
+        if deviation1 < 0.6 {
             self.form1.form_char = "V";
         }
+
         for i in 0..self.form1.form_indexes.len() {
             ind_num_types[self.form1.form_indexes[i]] = 1;
         }
@@ -196,34 +195,37 @@ impl Forms<'_> {
             self.form2.get_mean_div_intervals(&intervals.div_intervals);
             self.form2.get_mean_double_intervals(&intervals.intervals_r);
             let deviation2 = self.form2.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form2.mean_div_intervals >= 0.93 {
+            if self.form2.mean_div_intervals >= trs_div_intervals {
                 self.form2.form_char = "N";
             }
-            if (self.form2.mean_div_intervals < 0.93) && (self.form2.mean_div_intervals > 0.1) {
+            if (self.form2.mean_div_intervals < trs_div_intervals) && (self.form2.mean_div_intervals > 0.1) {
                 self.form2.form_char = "V";
             }
-            if deviation2 < 0.65 {
+            if deviation2 < 0.6 {
                 self.form2.form_char = "V";
             }
+
             for i in 0..self.form2.form_indexes.len() {
                 ind_num_types[self.form2.form_indexes[i]] = 2;
             }
         }
+
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.9);
             rem = self.form3.get_form_indexes(&leads, &refqrs, &rem, &intervals.ind_r);
             self.form3.get_mean_div_intervals(&intervals.div_intervals);
             self.form3.get_mean_double_intervals(&intervals.intervals_r);
             let deviation3 = self.form3.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form3.mean_div_intervals >= 0.92 {
+            if self.form3.mean_div_intervals >= trs_div_intervals {
                 self.form3.form_char = "N";
             }
-            if (self.form3.mean_div_intervals < 0.92) && (self.form3.mean_div_intervals > 0.1) {
+            if (self.form3.mean_div_intervals < trs_div_intervals) && (self.form3.mean_div_intervals > 0.1) {
                 self.form3.form_char = "V";
             }
-            if deviation3 < 0.65 {
+            if deviation3 < 0.6 {
                 self.form3.form_char = "V";
             }
+
             for i in 0..self.form3.form_indexes.len() {
                 ind_num_types[self.form3.form_indexes[i]] = 3;
             }
@@ -234,18 +236,20 @@ impl Forms<'_> {
             self.form4.get_mean_div_intervals(&intervals.div_intervals);
             self.form4.get_mean_double_intervals(&intervals.intervals_r);
             let deviation4 = self.form4.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form4.mean_div_intervals >= 0.92 {
+            if self.form4.mean_div_intervals >= trs_div_intervals {
                 self.form4.form_char = "N";
             }
-            if (self.form4.mean_div_intervals < 0.92) && (self.form4.mean_div_intervals > 0.1) {
+            if (self.form4.mean_div_intervals < trs_div_intervals) && (self.form4.mean_div_intervals > 0.1) {
                 self.form4.form_char = "V";
             }
-            if deviation4 < 0.65 {
+            if deviation4 < 0.6 {
                 self.form4.form_char = "V";
             }
+
             for i in 0..self.form4.form_indexes.len() {
                 ind_num_types[self.form4.form_indexes[i]] = 4;
             }
+
         }
         if !rem.is_empty() {
             refqrs.get_ref_forms(&leads, &rem, &intervals.ind_r, 0.9);
@@ -253,15 +257,16 @@ impl Forms<'_> {
             self.form5.get_mean_div_intervals(&intervals.div_intervals);
             self.form5.get_mean_double_intervals(&intervals.intervals_r);
             let deviation5 = self.form5.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form5.mean_div_intervals >= 0.92 {
+            if self.form5.mean_div_intervals >= trs_div_intervals {
                 self.form5.form_char = "N";
             }
-            if (self.form5.mean_div_intervals < 0.92) && (self.form5.mean_div_intervals > 0.1) {
+            if (self.form5.mean_div_intervals < trs_div_intervals) && (self.form5.mean_div_intervals > 0.1) {
                 self.form5.form_char = "V";
             }
-            if deviation5 < 0.65 {
+            if deviation5 < 0.6 {
                 self.form5.form_char = "V";
             }
+
             for i in 0..self.form5.form_indexes.len() {
                 ind_num_types[self.form5.form_indexes[i]] = 5;
             }
@@ -273,15 +278,16 @@ impl Forms<'_> {
             self.form6.get_mean_div_intervals(&intervals.div_intervals);
             self.form6.get_mean_double_intervals(&intervals.intervals_r);
             let deviation6 = self.form6.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form6.mean_div_intervals >= 0.92 {
+            if self.form6.mean_div_intervals >= trs_div_intervals {
                 self.form6.form_char = "N";
             }
-            if (self.form6.mean_div_intervals < 0.92) && (self.form6.mean_div_intervals > 0.1) {
+            if (self.form6.mean_div_intervals < trs_div_intervals) && (self.form6.mean_div_intervals > 0.1) {
                 self.form6.form_char = "V";
             }
-            if deviation6 < 0.65 {
+            if deviation6 < 0.6 {
                 self.form6.form_char = "V";
             }
+
             for i in 0..self.form6.form_indexes.len() {
                 ind_num_types[self.form6.form_indexes[i]] = 6;
             }
@@ -293,15 +299,16 @@ impl Forms<'_> {
             self.form7.get_mean_div_intervals(&intervals.div_intervals);
             self.form7.get_mean_double_intervals(&intervals.intervals_r);
             let deviation7 = self.form7.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form7.mean_div_intervals >= 0.92 {
+            if self.form7.mean_div_intervals >= trs_div_intervals {
                 self.form7.form_char = "N";
             }
-            if (self.form7.mean_div_intervals < 0.92) && (self.form7.mean_div_intervals > 0.1) {
+            if (self.form7.mean_div_intervals < trs_div_intervals) && (self.form7.mean_div_intervals > 0.1) {
                 self.form7.form_char = "V";
             }
-            if deviation7 < 0.65 {
+            if deviation7 < 0.6 {
                 self.form7.form_char = "V";
             }
+
             for i in 0..self.form7.form_indexes.len() {
                 ind_num_types[self.form7.form_indexes[i]] = 7;
             }
@@ -313,15 +320,16 @@ impl Forms<'_> {
             self.form8.get_mean_div_intervals(&intervals.div_intervals);
             self.form8.get_mean_double_intervals(&intervals.intervals_r);
             let deviation8 = self.form8.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form8.mean_div_intervals >= 0.92 {
+            if self.form8.mean_div_intervals >= trs_div_intervals {
                 self.form8.form_char = "N";
             }
-            if (self.form8.mean_div_intervals < 0.92) && (self.form8.mean_div_intervals > 0.1) {
+            if (self.form8.mean_div_intervals < trs_div_intervals) && (self.form8.mean_div_intervals > 0.1) {
                 self.form8.form_char = "V";
             }
-            if deviation8 < 0.65 {
+            if deviation8 < 0.6 {
                 self.form8.form_char = "V";
             }
+
             for i in 0..self.form8.form_indexes.len() {
                 ind_num_types[self.form8.form_indexes[i]] = 8;
             }
@@ -333,15 +341,16 @@ impl Forms<'_> {
             self.form9.get_mean_div_intervals(&intervals.div_intervals);
             self.form9.get_mean_double_intervals(&intervals.intervals_r);
             let deviation9 = self.form9.mean_double_intervals / intervals.mean_intervals_r;
-            if self.form9.mean_div_intervals >= 0.92 {
+            if self.form9.mean_div_intervals >= trs_div_intervals {
                 self.form9.form_char = "N";
             }
-            if (self.form9.mean_div_intervals < 0.92) && (self.form9.mean_div_intervals > 0.1) {
+            if (self.form9.mean_div_intervals < trs_div_intervals) && (self.form9.mean_div_intervals > 0.1) {
                 self.form9.form_char = "V";
             }
-            if deviation9 < 0.65 {
+            if deviation9 < 0.6 {
                 self.form9.form_char = "V";
             }
+
             for i in 0..self.form9.form_indexes.len() {
                 ind_num_types[self.form9.form_indexes[i]] = 9;
             }
@@ -367,7 +376,7 @@ impl Forms<'_> {
                 7 => self.form7.form_char,
                 8 => self.form8.form_char,
                 9 => self.form9.form_char,
-                _ => "A",
+                _ => "N",
             };
             let text1 = format!("{};{};{}\n", &intervals.ind_r[i], &intervals.intervals_r[i], arg3);
             let (encoded_text, _encoding_used, _errors) = WINDOWS_1251.encode(&text1);

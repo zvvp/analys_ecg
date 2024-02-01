@@ -174,7 +174,7 @@ fn get_trs(p2p: &Vec<f32>) -> f32 {
     trs
 }
 
-fn get_p2p(ch: &Vec<f32>, win: usize, sqr: bool) -> Vec<f32> {
+pub fn get_p2p(ch: &Vec<f32>, win: usize, sqr: bool) -> Vec<f32> {
     let half_win = win / 2;
     let len_ch = ch.len();
     let mut p2p = vec![0.0; len_ch];
@@ -204,7 +204,7 @@ fn get_p2p(ch: &Vec<f32>, win: usize, sqr: bool) -> Vec<f32> {
     p2p
 }
 
-fn del_artifacts(ch: &Vec<f32>, p2p: &Vec<f32>) -> (Vec<f32>, Vec<f32>) {
+pub fn del_artifacts(ch: &Vec<f32>, p2p: &Vec<f32>) -> (Vec<f32>, Vec<f32>) {
     let len_ch = ch.len();
     let mut out = ch.to_owned();
     let mut mask = vec![1.0; len_ch];
@@ -414,19 +414,11 @@ fn pre_proc_lead(ch: &Vec<f32>) -> Vec<f32> {
     let p2p_ch = get_p2p(&ch, 40, false);
     let art = del_artifacts(&ch, &p2p_ch);
     let ch = multi_del_isoline(&art.0);
-    // ch
     let fch = del_nouse(&ch, &art.1);
     let fch = get_p2p(&fch, 30, true);
     let fch = filt_r(&fch);
     fch
 }
-
-// fn get_fch(ch: &Vec<f32>, art: &Vec<f32>) -> Vec<f32> {
-//     let fch = del_nouse(&ch, &art);
-//     let fch = get_p2p(&fch, 30, true);
-//     let fch = filt_r(&fch);
-//     fch
-// }
 
 pub fn pre_proc_r(leads: &mut Ecg) -> Vec<f32> {
     let ch1 = leads.lead1.to_owned();

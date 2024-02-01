@@ -17,7 +17,12 @@ fn norm_qrs(qrs: &Vec<f32>) -> Vec<f32> {
             max = out[i];
         }
     }
-    if max < 0.1 {
+    // if max > 0.0 {
+    //     for i in 0..out.len() {
+    //         out[i] = out[i] / max;
+    //     }
+    // }
+    if max < 0.05 {
         for i in 0..out.len() {
             out[i] = 0.0;
         }
